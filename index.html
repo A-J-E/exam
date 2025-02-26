@@ -25,6 +25,225 @@
 <body>
     <h2>Python Code</h2>
     <pre>
+Practical 2
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+cust = pd.read_csv("/content/Ecommerce Customers.csv")
+cust.head()
+cust.describe()
+cust.info()
+import seaborn as sns
+sns.jointplot(x='Time on Website',y='Yearly Amount Spent',data=cust)
+
+sns.jointplot(x='Time on App',y='Yearly Amount Spent',data=cust)
+
+sns.jointplot(x='Time on App',y='Yearly Amount Spent',data=cust,kind='kde')
+
+sns.pairplot(cust)
+
+y=cust['Yearly Amount Spent']
+x=cust[['Avg. Session Length','Time on App','Time on Website','Length of Membership']]
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.3,random_state=129)
+x_train
+x_test
+y_train
+y_test
+from sklearn.linear_model import LinearRegression
+lm = LinearRegression()
+lm.fit(x_train,y_train)
+print('Coefficients: \n',lm.coef_)
+print(lm.intercept_)
+pred=lm.predict(x_test)
+pred
+plt.scatter(y_test,pred)
+plt.xlabel('Y Test')
+plt.ylabel('Predicted Y')
+
+from sklearn import metrics
+print('MAE:',metrics.mean_absolute_error(y_test,pred))
+print('MSE:',metrics.mean_squared_error(y_test,pred))
+print('RMSE:',np.sqrt(metrics.mean_squared_error(y_test,pred)))
+sns.distplot((y_test-pred),bins=50)
+
+coe = pd.DataFrame(lm.coef_,x.columns,columns=['Coeff'])
+coe
+
+********************************************************************************************************************************************************************
+
+practical 3
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, Lasso, Ridge
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import PolynomialFeatures
+
+# Load data
+df = pd.read_csv("Ecommerce Customers - Ecommerce Customers.csv")
+
+# Define features (X) and target (y)
+x = df[['Time on Website']]
+y = df[['Yearly Amount Spent']]
+
+# Split data into training and testing sets
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+
+# Polynomial Regression
+degree = 2
+poly_reg = PolynomialFeatures(degree=degree, include_bias=False)
+x_poly = poly_reg.fit_transform(x_train)
+ploy_reg = LinearRegression().fit(x_poly, y_train)
+x_test_poly = poly_reg.transform(x_test)
+poly_pred = ploy_reg.predict(x_test_poly)
+
+# Linear Regression
+linear_reg = LinearRegression().fit(x_train, y_train)
+linear_pred = linear_reg.predict(x_test)
+
+# Lasso Regression
+alpha_lasso = 0.1
+lasso_reg = Lasso(alpha=alpha_lasso).fit(x_train, y_train)
+lasso_pred = lasso_reg.predict(x_test)
+
+# Ridge Regression
+alpha_ridge = 0.1
+ridge_reg = Ridge(alpha=alpha_ridge).fit(x_train, y_train)
+ridge_pred = ridge_reg.predict(x_test)
+
+# Print Mean Squared Errors
+print("Linear Regression MSE:", mean_squared_error(y_test, linear_pred))
+print(f"Polynomial Regression (Degree: {degree}) MSE:", mean_squared_error(y_test, poly_pred))
+print(f"Lasso Regression (Alpha: {alpha_lasso}) MSE:", mean_squared_error(y_test, lasso_pred))
+print(f"Ridge Regression (Alpha: {alpha_ridge}) MSE:", mean_squared_error(y_test, ridge_pred))
+
+# Plotting functions
+def plot_regression(title, y_pred, color, label):
+    plt.scatter(x_test, y_test, color=color, label='Actual Data')
+    plt.plot(x_test, y_pred, label=label)
+    plt.legend()
+    plt.xlabel('Time on Website')
+    plt.ylabel('Yearly Amount Spent')
+    plt.title(title)
+    plt.show()
+
+# Plot comparisons
+plot_regression('Linear Regression', linear_pred, 'blue', 'Linear Regression')
+plot_regression(f'Polynomial Regression (Degree: {degree})', poly_pred, 'red', f'Polynomial Regression (Degree: {degree})')
+plot_regression(f'Lasso Regression (Alpha {alpha_lasso})', lasso_pred, 'yellow', f'Lasso Regression (Alpha {alpha_lasso})')
+plot_regression(f'Ridge Regression (Alpha {alpha_ridge})', ridge_pred, 'pink', f'Ridge Regression (Alpha {alpha_ridge})')
+
+********************************************************************************************************************************************************************
+
+Practical 4
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn import metrics
+
+# Load the dataset
+df = pd.read_csv("iphone_purchase_records.csv")
+
+# Add log-transformed columns for 'Age' and 'Salary'
+df['log_age'] = np.log(df['Age'])
+df['log_sal'] = np.log(df['Salary'])
+df.head()
+
+# Visualize the data
+plt.figure(figsize=(10, 4))
+
+plt.subplot(1, 3, 1)
+sns.swarmplot(y='Salary', x='Purchase Iphone', hue='Gender', data=df)
+plt.title("Salary Distribution by Purchase and Gender")
+
+plt.subplot(1, 3, 2)
+sns.countplot(x='Gender', hue='Purchase Iphone', data=df)
+plt.title("Purchase Count by Gender")
+
+plt.subplot(1, 3, 3)
+sns.scatterplot(x='Age', y='Salary', hue='Purchase Iphone', data=df)
+plt.title("Age vs Salary by Purchase")
+
+plt.tight_layout()
+plt.show()
+
+# Prepare features (X) and target (y)
+X = np.array(df[['Gender', 'log_age', 'log_sal']])
+y = np.array(df[['Purchase Iphone']])
+
+# Encode 'Gender' column
+labelEncoder_gender = LabelEncoder()
+X[:, 0] = labelEncoder_gender.fit_transform(X[:, 0])
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+
+# Standardize features
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)  # Use 'transform' instead of 'fit_transform' here
+
+# Train the SVM classifier
+classifier = SVC(kernel='linear', random_state=0)
+classifier.fit(X_train, y_train.ravel())  # Flatten y_train to 1D array
+
+# Predict on the test set
+y_pred = classifier.predict(X_test)
+
+# Evaluate the model
+cm = metrics.confusion_matrix(y_test, y_pred)
+accuracy = metrics.accuracy_score(y_test, y_pred)
+precision = metrics.precision_score(y_test, y_pred)
+recall = metrics.recall_score(y_test, y_pred)
+
+print("Confusion Matrix:\n", cm)
+print("Accuracy score:", accuracy)
+print("Precision score:", precision)
+print("Recall score:", recall)
+
+********************************************************************************************************************************************************************
+
+Practical 5
+
+from sklearn import datasets
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix,classification_report
+
+iris=datasets.load_iris()
+irs=pd.DataFrame(iris.data,columns=iris.feature_names)
+irs['class']=iris.target
+#print(irs)
+#print(irs.describe())
+x=irs.iloc[:,:-1].values
+y=irs.iloc[:,4].values
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.20)
+
+scaler=StandardScaler()
+scaler.fit(x_train)
+x_train=scaler.transform(x_train)
+x_test=scaler.transform(x_test)
+classifier=KNeighborsClassifier(n_neighbors=5)
+classifier.fit(x_train,y_train)
+
+y_pred=classifier.predict(x_test)
+
+print(confusion_matrix(y_test,y_pred))
+print(classification_report(y_test,y_pred))
+
 ********************************************************************************************************************************************************************
 Practical 6
 
@@ -193,7 +412,56 @@ cust4=df1[df1["label"]==4]
 print('Number of customer in 4th group=', len(cust4))
 print('They are -', cust4["CustomerID"].values)
 
-____________________________________________________________________________________________________________________________________________________________________
+********************************************************************************************************************************************************************
+
+Practical 7
+
+%matplotlib inline
+import matplotlib.pyplot as plt
+import numpy as np
+X=np.array([
+    [7,8],[12,20],[17,23],[26,15],[32,37],[87,75],[73,85],[62,80],[73,60],[87,96]
+])
+labels=range(1,11)
+plt.figure(figsize=(10,7))
+plt.scatter(X[:,0],X[:,1],label='True Position')
+for label,x,y in zip(labels,X[:,0],X[:,1]):
+  plt.annotate(label,xy=(x,y),xytext=(-3,3),textcoords='offset points',ha='right',va='bottom')
+
+plt.show()
+from scipy.cluster.hierarchy import dendrogram,linkage
+from matplotlib import pyplot as plt
+linked=linkage(X,'average')
+labelList=range(1,11)
+plt.figure(figsize=(5,5))
+dendrogram(linked,orientation='top',labels=labelList,
+          distance_sort='descending',show_leaf_counts=True)
+
+plt.show()
+from sklearn.cluster import AgglomerativeClustering
+cluster=AgglomerativeClustering(n_clusters=3,linkage='ward')
+cluster.fit_predict(X)
+np.random.seed(0)
+X = np.random.randint(1, 100, size=(10, 2))
+labels=range(1,11)
+plt.figure(figsize=(10,7))
+plt.scatter(X[:,0],X[:,1],label='True Position')
+for label,x,y in zip(labels,X[:,0],X[:,1]):
+  plt.annotate(label,xy=(x,y),xytext=(-3,3),textcoords='offset points',ha='right',va='bottom')
+plt.show()
+from scipy.cluster.hierarchy import dendrogram,linkage
+from matplotlib import pyplot as plt
+linked=linkage(X,'average')
+labelList=range(1,11)
+plt.figure(figsize=(5,5))
+dendrogram(linked,orientation='top',labels=labelList,
+          distance_sort='descending',show_leaf_counts=True)
+plt.show()
+from sklearn.cluster import AgglomerativeClustering
+cluster=AgglomerativeClustering(n_clusters=3,linkage='ward')
+cluster.fit_predict(X)
+
+********************************************************************************************************************************************************************
 practical 8
         
 !pip install apyori
@@ -373,6 +641,38 @@ submission=pd.DataFrame({'PassengerId': test_ids})
 submission['Survived']=test_predictions.astype('int')
 submission.to_csv('submission.csv',index=False)
 submission.head(10)
+
+********************************************************************************************************************************************************************
+
+Practical 10
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+df = pd.read_csv('/content/heart.csv')
+df.head()
+x=df.drop("target",axis=1)
+y=df["target"]
+from sklearn.ensemble import RandomForestClassifier
+clf = RandomForestClassifier()
+clf.get_params()
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2)
+clf.fit(x_train,y_train)
+y_preds=clf.predict(x_test)
+y_preds
+y_test
+clf.score(x_train,y_train)
+clf.score(x_test,y_test)
+from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
+print(classification_report(y_test,y_preds))
+confusion_matrix(y_test,y_preds)
+accuracy_score(y_test,y_preds)
+np.random.seed(42)
+for i in range(1,22,1):
+  print(f"Trying model with {i} estimators")
+  clf=RandomForestClassifier(n_estimators=i).fit(x_train,y_train)
+  print(f"Model accuracy on test set: {clf.score(x_test,y_test)*100:.2f}%")
+  print("")
 
     </pre>
 </body>
