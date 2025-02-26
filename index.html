@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practical 6 Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/matplotlib/3.4.3/matplotlib.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/seaborn/0.11.2/seaborn.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matplotlib/3.4.3/matplotlib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seaborn/0.11.2/seaborn.min.js"></script>
+</head>
+<body>
+    <h1>Practical 6: Customer Segmentation</h1>
+    <p>This document contains data analysis and visualizations based on customer data using Python, Pandas, Seaborn, and Matplotlib.</p>
+
+    <h2>Correlation Analysis</h2>
+    <p>Correlation between Age, Annual Income, and Spending Score is computed to understand relationships.</p>
+
+    <h2>Data Distributions</h2>
+    <h3>Annual Income Distribution</h3>
+    <img src="annual_income_distribution.png" alt="Annual Income Distribution" width="600">
+    
+    <h3>Age Distribution</h3>
+    <img src="age_distribution.png" alt="Age Distribution" width="600">
+    
+    <h3>Spending Score Distribution</h3>
+    <img src="spending_score_distribution.png" alt="Spending Score Distribution" width="600">
+
+    <h2>Gender Distribution</h2>
+    <img src="gender_distribution.png" alt="Gender Distribution" width="600">
+
+    <h2>Scatter Plots</h2>
+    <h3>Age vs Annual Income</h3>
+    <img src="age_vs_income.png" alt="Age vs Annual Income" width="600">
+    
+    <h3>Annual Income vs Spending Score</h3>
+    <img src="income_vs_spending.png" alt="Annual Income vs Spending Score" width="600">
+
+    <h2>Customer Segmentation</h2>
+    <p>K-Means Clustering is used to segment customers into five groups based on their spending behavior.</p>
+    <img src="customer_segmentation.png" alt="Customer Segmentation" width="600">
+
+    <h2>Cluster Details</h2>
+    <p>Each customer has been grouped into clusters based on their spending habits.</p>
+    <pre>
+        Cluster 0: <span id="cluster0"></span><br>
+        Cluster 1: <span id="cluster1"></span><br>
+        Cluster 2: <span id="cluster2"></span><br>
+        Cluster 3: <span id="cluster3"></span><br>
+        Cluster 4: <span id="cluster4"></span>
+    </pre>
+
+    <script>
+        document.getElementById("cluster0").textContent = "Number of customers in cluster 0: ...";
+        document.getElementById("cluster1").textContent = "Number of customers in cluster 1: ...";
+        document.getElementById("cluster2").textContent = "Number of customers in cluster 2: ...";
+        document.getElementById("cluster3").textContent = "Number of customers in cluster 3: ...";
+        document.getElementById("cluster4").textContent = "Number of customers in cluster 4: ...";
+    </script>
+</body>
+</html>
