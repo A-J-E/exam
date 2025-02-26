@@ -99,6 +99,187 @@ plt.show()
 # Display number of customers in each cluster
 data.groupby('Cluster')['CustomerID'].count().rename("Count")
 
+____________________________________________________________________________________________________________________________________________________________________
+practical 8
+        
+!pip install apyori
+
+import pandas as pd
+import numpy as np
+from apyori import apriori
+path = '/content/Market_Basket_Optimisation.csv'
+df=pd.read_csv(path)
+df.fillna(0,inplace=True)
+df.head()
+
+transactions=[]
+for i in range(0,len(df)):
+  transactions.append([str(df.values[i,j])for j in range(0,20) if str(df.values[i,j])!='0'])
+
+transactions[0]
+
+transactions[1]
+
+rules=apriori(transactions,min_support=0.003,min_confidence=0.2,min_lift=3,min_length=2)
+rules
+
+Results=list(rules)
+Results
+
+df_results=pd.DataFrame(Results)
+df_results.head()
+
+support=df_results.support
+
+first_values=[]
+second_values=[]
+third_values=[]
+fourth_values=[]
+
+for i in range(df_results.shape[0]):
+  single_list=df_results['ordered_statistics'][i][0]
+  first_values.append(list(single_list[0]))
+  second_values.append(list(single_list[1]))
+  third_values.append(single_list[2])
+  fourth_values.append(single_list[3])
+
+lhs=pd.DataFrame(first_values)
+rhs=pd.DataFrame(second_values)
+confidence=pd.DataFrame(third_values,columns=['Confidence'])
+lift=pd.DataFrame(fourth_values,columns=['lift'])
+
+df_final=pd.concat([lhs,rhs,support,confidence,lift],axis=1)
+df_final
+
+df_final.fillna(value=' ',inplace=True)
+df_final.head()
+
+df_final.columns=['lhs',1,'rhs',2,3,4,'support','confidence','lift']
+df_final.head()
+
+df_final['lhs']=df_final['lhs']+str(", ")+df_final[1]
+df_final['rhs']=df_final['rhs']+str(", ")+df_final[2]+str(", ")+df_final[3]
+df_final.head()
+
+df_final.drop(columns=[1,2,3,4],inplace=True)
+df_final.head()
+
+df_final.sort_values('lift',ascending=False).head(10)
+
+
+____________________________________________________________________________________________________________________________________________________________________
+practical 9
+
+# Commented out IPython magic to ensure Python compatibility.
+import warnings
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import pearsonr
+from sklearn.naive_bayes import GaussianNB
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, recall_score, precision_score
+# %matplotlib inline
+warnings.filterwarnings("ignore")
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+
+def cross_validate(estimator,train,validation):
+  X_train=train[0]
+  Y_train=train[1]
+  X_val=validation[0]
+  Y_val=validation[1]
+  train_predictions=classifier.predict(X_train)
+  train_accuracy=accuracy_score(Y_train,train_predictions)
+  train_recall=recall_score(Y_train,train_predictions)
+  train_precision=precision_score(Y_train,train_predictions)
+  val_predictions=classifier.predict(X_val)
+  val_accuracy=accuracy_score(Y_val,val_predictions)
+  val_recall=recall_score(Y_val,val_predictions)
+  val_precision=precision_score(Y_val,val_predictions)
+
+  print('Model metrics')
+  print('Accuracy Train: %.2f, Validation: %.2f' %(train_accuracy,val_accuracy))
+  print('Recall Train: %.2f, Validation: %.2f' % (train_recall,val_recall))
+  print('Precision Train: %.2f, Validation: %.2f' % (train_precision,val_precision))
+
+test_raw=pd.read_csv('/content/test.csv')
+train_raw=pd.read_csv('/content/train (1).csv')
+
+test_ids=test_raw['PassengerId'].values
+train_raw['train']=1
+test_raw['train']=0
+data = pd.concat([test_raw, train_raw], sort=False)
+data.head()
+
+data.describe()
+
+features=['Age','Embarked','Fare','Parch','Pclass','Sex','SibSp']
+target='Survived'
+data=data[features+[target]+['train']]
+data['Sex']=data['Sex'].replace(["female","male"],[0,1])
+data['Embarked']=data['Embarked'].replace(['S','C','Q'],[1,2,3])
+data['Age']=pd.qcut(data['Age'],10,labels=False)
+
+train=data.query('train==1')
+test=data.query('train==0')
+train.dropna(axis=0,inplace=True)
+labels=train[target].values
+train.head()
+
+columns=train[features+[target]].columns.tolist()
+nColumns=len(columns)
+result=pd.DataFrame(np.zeros((nColumns,nColumns)),columns=columns)
+
+for col_a in range(nColumns):
+  for col_b in range(nColumns):
+    result.iloc[[col_a,col_b]]=pearsonr(train.loc[:,columns[col_a]],train.loc[:,columns[col_b]])[0]
+
+fig,ax=plt.subplots(figsize=(10,10))
+ax=sns.heatmap(result,yticklabels=columns,vmin=1,vmax=1,annot=True,fmt='.2f',linewidths=.2)
+ax.set_title('Pearson Correlation')
+plt.show()
+
+continuous_numeric_features=['Age','Fare','Parch','SibSp']
+for feature in continuous_numeric_features:
+  sns.distplot(train[features])
+  plt.show()
+
+train.drop(['train',target,'Pclass'],axis=1,inplace=True)
+test.drop(['train',target,'Pclass'],axis=1,inplace=True)
+X_train,X_val,Y_train,Y_val=train_test_split(train,labels,test_size=0.2,random_state=29)
+X_train.head()
+
+X_train1,X_train2,Y_train1,Y_train2=train_test_split(train,labels,test_size=0.3,random_state=29)
+classifier=GaussianNB()
+classifier.fit(X_train2,Y_train2)
+print('Metrics with only 30% of train data')
+cross_validate(classifier,(X_train,Y_train),(X_val,Y_val))
+
+classifier.partial_fit(X_train1,Y_train1)
+print('Metrics with 70% of train data')
+cross_validate(classifier,(X_train,Y_train),(X_val,Y_val))
+
+print('Probability of each class')
+print('Survive = 0: %.2f' % classifier.class_prior_[0])
+print('Survive = 1: %.2f' % classifier.class_prior_[1])
+
+print('Mean of each feature per class')
+print('                 Age       Embarked      Fare        Parch       Sex       SibSp')
+print('Survive = 0: %s' % classifier.theta_[0])
+print('Survive = 1: %s' % classifier.theta_[1])
+
+print('Variance of each feature per class')
+print('Survive = 0: %s' % classifier.var_[0])
+print('Survive = 1: %s' % classifier.var_[1])
+
+test.fillna(test.mean(),inplace=True)
+test_predictions=classifier.predict(test)
+submission=pd.DataFrame({'PassengerId': test_ids})
+submission['Survived']=test_predictions.astype('int')
+submission.to_csv('submission.csv',index=False)
+submission.head(10)
+
     </pre>
 </body>
 </html>
